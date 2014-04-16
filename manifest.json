@@ -1,0 +1,31 @@
+{
+  "name": "Drink Up",
+  "description": "Order some drinks!",
+  "background": {
+      "scripts": ["/js/background.js","/js/socket.io.js"]
+  },
+  "version": "1.0",
+  "permissions": [
+    "tabs", "http://*/*", "https://*/*", "storage"
+  ],
+  "browser_action": {
+      "default_title": "Offer Drinks!",
+      "default_icon": "/images/icon.png",
+      "default_popup": "/views/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["/js/handlebars-v1.3.0.js","/js/notice.js"],
+      "css": ["/css/screen.css"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    "/views/notice.html",
+    "/js/handlebars-v1.3.0.js"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "manifest_version": 2
+}

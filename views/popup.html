@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Drink it up!</title>
+		<link rel="stylesheet" type="text/css" href="/css/screen.css">
+		<script src="/js/handlebars-v1.3.0.js"></script>
+		<script src="/js/popup.js"></script>
+
+	</head>
+	<script id="popup" type="text/x-handlebars-template">
+	
+	{{notification}}
+
+	<div class="title">
+		<span>Offer up a Drink!</span>
+		<img src="/images/vin65.png" class="vin65" height="24px">
+	</div>
+
+	{{#each drinks}}
+		<div class="drinkUp-button drinkUp-blue" drinkUp-action="offerDrink" data-drinkID="{{drinkID}}"><img src="{{drinkImage}}"> {{drinkName}}</div>
+	{{/each}}
+
+
+	<div class="options">
+		<span>I am <a href="#" drinkUp-action="toggleSetName">{{options.name}}</a></span> <span>and <a href="#" drinkUp-action="toggleDesire">{{options.desire}}</a> to be notified</span>
+	</div>
+
+	{{#if options.settingName}}
+		<input type="text" name="name" placeholder="Name">
+		<div class="drinkUp-button drinkUp-green" drinkUp-action="saveName">Save</div>
+	{{/if}}
+
+	</script>
+	<body class="drinkUp">
+
+	</body>
+</html>
