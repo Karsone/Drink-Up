@@ -1,52 +1,98 @@
 drinkUp = {
 	init: function(){
-		drinkUp.newOffer();
-	},	
-	newOffer: function(){
+		drinkUpAcceptedOffer = false;
+		var currentUser = "";
+		chrome.storage.sync.get("name", function(storage){
+			currentUser = storage.name;
+		});
 		chrome.runtime.onMessage.addListener(function(data) {
 			if(data.action == "newOffer"){
-				request = new XMLHttpRequest();
-				request.open('GET', chrome.extension.getURL('/views/notice.html'), true);
-				request.onload = function() {
-				  var source = document.createElement("div");
-				  source.innerHTML = request.responseText;
-				  source = source.querySelector("script").innerHTML;
-				  template = Handlebars.compile(source); 
-				  var body = document.querySelector('body');
-				  body.innerHTML = body.innerHTML + template(data);
-				  drinkUp.countdownOffer();
-				  drinkUp.drinkOptions.iWantDrink();
-				  drinkUp.drinkOptions.noDrink();
-				  drinkUp.drinkOptions.buggerOff();
 
-				};
-				request.send();
+				if(document.querySelectorAll(".drinkUp-notice").length){
+					alert("Tell "+data.user+" to wait until later! Only one offer at a time!")
+				}else if(data.user == currentUser) {
+
+					chrome.extension.sendMessage({
+					  "action":"serverCountdown"
+					});
+
+					drinkUp.newOffer(data);
+
+				} else {
+
+					drinkUp.newOffer(data);
+				}
 			}
 		});
-	},
-	countdownOffer: function(clear){
-		var interval = setInterval(function(){
-			var countdown = document.querySelector("[drinkUp-action='countdown']")
-			countdown.innerHTML = countdown.innerHTML-1;
-			if(countdown.innerHTML < 1 ){
-				clearInterval(interval);
-			}
-		},1000);
+	},	
+	newOffer: function(data){
+		request = new XMLHttpRequest();
+		request.open('GET', chrome.extension.getURL('/views/notice.html'), true);
+		request.onload = function() {
 
-		if(clear){
-			clearInterval(interval);
+
+		  var source = document.createElement("div");
+		  //HandlesBars.js compiled code.
+		  source.innerHTML = request.responseText;
+		  compiledSource = source.querySelector("script").innerHTML;
+		  template = Handlebars.compile(compiledSource); 
+		  source = document.createElement("div");
+		  source.innerHTML = template(data)
+
+
+		  document.getElementsByTagName('body')[0].appendChild(source);
+
+
+
+		  //Fires Event Listeners
+		  drinkUp.countdownOffer(data);
+		  drinkUp.drinkOptions.iWantDrink(data);
+		  drinkUp.drinkOptions.noDrink();
+		  drinkUp.drinkOptions.buggerOff();
+
+		};
+		request.send();
+	},
+	countdownOffer: function(data){
+
+		//Grab countdown number.
+		var timeout =  function(){
+			setTimeout(function(){
+				var drinkUpSecondsLeft = document.querySelector("[drinkUp-action='countdown']")
+				if(drinkUpSecondsLeft.innerHTML > 1){
+					drinkUpSecondsLeft.innerHTML = drinkUpSecondsLeft.innerHTML-1;
+					console.log(drinkUpSecondsLeft);
+					timeout();
+				}else{
+					// if(drinkUpAcceptedOffer){
+					// 	alert("Client Done");
+					// }
+					drinkUp.removeNotice();
+				}
+			},1000);
 		}
+
+		timeout();			
+
 	},
 	drinkOptions:{
-		iWantDrink: function(){
-			// document.querySelector('[drinkUp-action="iWantDrink"]').addEventListener('click', function(){
-
-			// });
+		iWantDrink: function(data){
+			document.querySelector('[drinkUp-action="iWantDrink"]').addEventListener('click', function(){
+				//Accept Offer
+				drinkUpAcceptedOffer = true;
+				chrome.extension.sendMessage({
+				  "action":"iWantDrink",
+				  drinkID: data.drinkID,
+				  drinkName: data.drinkName,
+				  user: data.user
+				});
+				drinkUp.removeNotice();
+			});
 		},
 		noDrink: function(){
-			// document.querySelector('[drinkUp-action="noDrink"]').addEventListener('click', function(){
-
-			// });
+			document.querySelector('[drinkUp-action="noDrink"]').addEventListener('click', function(){
+				drinkUp.removeNotice();
+			});
 		},
 		buggerOff: function(){
 			document.querySelector('[drinkUp-action="buggerOff"]').addEventListener('click', function(){
@@ -58,9 +104,9 @@ drinkUp = {
 		}
 	},
 	removeNotice: function(){
+		document.querySelector("[drinkUp-action='countdown']").innerHTML = 0;
 		notice = document.querySelector(".drinkUp-notice")
 		notice.parentNode.removeChild(notice);
-		drinkUp.countdownOffer(true);
 	}
 }
 

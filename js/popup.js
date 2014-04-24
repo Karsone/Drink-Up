@@ -6,12 +6,12 @@ drinkUp = {
     Array.prototype.forEach.call(document.querySelectorAll('[drinkUp-action="offerDrink"]'), function(element){
       element.addEventListener('click', function(){
         drinkID = element.getAttribute('data-drinkID');
+        drinkName = element.getAttribute('data-drinkName');
         chrome.extension.sendMessage({
           "action":"offerDrink",
           drinkID: drinkID,
-          user: chrome.storage.sync.get("name", function(storage){
-            return storage.name;
-          })
+          drinkName: drinkName,
+          user: document.querySelector('[drinkUp-action="toggleSetName"]').innerHTML
         });
         window.close();
       });

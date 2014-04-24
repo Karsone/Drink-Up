@@ -3,6 +3,8 @@ drinkUp = {
     drinkUp.socketConnection();
     drinkUp.newOffer();
     drinkUp.offerDrink();
+    drinkUp.iWantDrink();
+    drinkUp.serverCountdown();
 
     //LocalStorage Defaults
 
@@ -19,6 +21,37 @@ drinkUp = {
     });
 
 
+  },
+  iWantDrink: function(){
+    chrome.extension.onMessage.addListener( function(data){
+      if(data.action == "iWantDrink"){
+        socket.emit('iWantDrink', data);
+      }
+    });
+  },
+  serverCountdown: function(){
+    var drinkers = [];
+    socket.on('newDrinker', function (data) {
+      drinkers.push(data);
+    });
+
+    chrome.extension.onMessage.addListener( function(data){
+      if(data.action == "serverCountdown"){
+        secondsLeft = 10;
+        var timeout = function(){
+          setTimeout( function(){
+            if(secondsLeft > 1){
+              secondsLeft = secondsLeft-1;
+              timeout();
+            }else{
+              // alert("Server Done!");
+              console.log(drinkers);
+            }
+          },1000);
+        }
+        timeout();
+      }
+    });
   },
   socketConnection: function(){
     //Initial Socket Connection
