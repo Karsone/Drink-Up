@@ -44,8 +44,14 @@ drinkUp = {
               secondsLeft = secondsLeft-1;
               timeout();
             }else{
-              // alert("Server Done!");
-              console.log(drinkers);
+              chrome.tabs.create({ url: "http://vin65.com/" }, function(){
+                drinkerString = "";
+                drinkers.forEach(function(element, index, array){
+                  drinkerString += "\n - "+ element.user;
+                });
+                alert("You are making "+ drinkers.length +" "+drinkers[0].drinkName+"'s with "+drinkers[drinkers.length-1].user+" for "+drinkerString+"")
+                drinkers = [];
+              });
             }
           },1000);
         }
@@ -72,6 +78,8 @@ drinkUp = {
 
       chrome.storage.sync.get("desire", function(storage){
         if(storage.desire == "Want to"){
+          var notification = webkitNotifications.createNotification("","New Drink Offer!","Someone is offering " + data.drinkName);
+          notification.show();
           chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             chrome.tabs.sendMessage(tabs[0].id, data);
           });

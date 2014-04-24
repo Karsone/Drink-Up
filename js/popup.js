@@ -7,13 +7,19 @@ drinkUp = {
       element.addEventListener('click', function(){
         drinkID = element.getAttribute('data-drinkID');
         drinkName = element.getAttribute('data-drinkName');
-        chrome.extension.sendMessage({
-          "action":"offerDrink",
-          drinkID: drinkID,
-          drinkName: drinkName,
-          user: document.querySelector('[drinkUp-action="toggleSetName"]').innerHTML
-        });
-        window.close();
+        userName = document.querySelector('[drinkUp-action="toggleSetName"]').innerHTML;
+        if(userName == "None"){
+          drinkUp.templateData.notification = "You Need a name!";
+          drinkUp.templateRender();
+        }else{
+          chrome.extension.sendMessage({
+            "action":"offerDrink",
+            drinkID: drinkID,
+            drinkName: drinkName,
+            user: userName
+          });
+          window.close();
+        }
       });
     });
   },
@@ -89,13 +95,13 @@ drinkUp = {
     ]
   },
   templateRender: function(){
-    drinkUp.templateData.notification = "";
     var source = document.querySelectorAll('#popup')[0].innerHTML
     var template = Handlebars.compile(source); 
     document.querySelectorAll('body')[0].innerHTML = template(drinkUp.templateData);
     drinkUp.toggleSetName();
     drinkUp.drinkButtons();
     drinkUp.toggleDesire();
+    drinkUp.templateData.notification = "";
   }
 }
 

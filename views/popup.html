@@ -9,16 +9,19 @@
 	</head>
 	<script id="popup" type="text/x-handlebars-template">
 	
-	{{notification}}
 
 	<div class="title">
 		<span>Offer up a Drink!</span>
 		<img src="/images/vin65.png" class="vin65" height="24px">
 	</div>
 
+	{{notification}}
+
 	{{#each drinks}}
 		<div class="drinkUp-button drinkUp-blue" drinkUp-action="offerDrink" data-drinkName="{{drinkName}}" data-drinkID="{{drinkID}}"><img src="{{drinkImage}}"> {{drinkName}}</div>
 	{{/each}}
+
+
 
 
 	<div class="options">

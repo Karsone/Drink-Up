@@ -1,22 +1,28 @@
 drinkUp = {
 	init: function(){
 		drinkUpAcceptedOffer = false;
-		var currentUser = "";
+		drinkUpCurrentUser = "";
 		chrome.storage.sync.get("name", function(storage){
-			currentUser = storage.name;
+			drinkUpCurrentUser = storage.name;
 		});
 		chrome.runtime.onMessage.addListener(function(data) {
 			if(data.action == "newOffer"){
 
 				if(document.querySelectorAll(".drinkUp-notice").length){
 					alert("Tell "+data.user+" to wait until later! Only one offer at a time!")
-				}else if(data.user == currentUser) {
+				}else if(data.user == drinkUpCurrentUser) {
 
 					chrome.extension.sendMessage({
 					  "action":"serverCountdown"
 					});
 
-					drinkUp.newOffer(data);
+					chrome.extension.sendMessage({
+					  "action":"iWantDrink",
+					  drinkID: data.drinkID,
+					  drinkName: data.drinkName,
+					  user: drinkUpCurrentUser
+					});
+
 
 				} else {
 
@@ -72,8 +78,7 @@ drinkUp = {
 			},1000);
 		}
 
-		timeout();			
-
+		timeout();	
 	},
 	drinkOptions:{
 		iWantDrink: function(data){
@@ -84,7 +89,7 @@ drinkUp = {
 				  "action":"iWantDrink",
 				  drinkID: data.drinkID,
 				  drinkName: data.drinkName,
-				  user: data.user
+				  user: drinkUpCurrentUser
 				});
 				drinkUp.removeNotice();
 			});
