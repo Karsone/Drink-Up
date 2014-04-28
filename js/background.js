@@ -5,6 +5,9 @@ drinkUp = {
     drinkUp.offerDrink();
     drinkUp.iWantDrink();
     drinkUp.serverCountdown();
+    drinkUp.changeDesire();
+    drinkUp.changeName();
+    drinkUp.changeCellNumber();
 
     //LocalStorage Defaults
 
@@ -19,8 +22,6 @@ drinkUp = {
         chrome.storage.sync.set({"desire":"Want to"});
       }
     });
-
-
   },
   iWantDrink: function(){
     chrome.extension.onMessage.addListener( function(data){
@@ -37,6 +38,7 @@ drinkUp = {
 
     chrome.extension.onMessage.addListener( function(data){
       if(data.action == "serverCountdown"){
+        drinkers = [];
         secondsLeft = 10;
         var timeout = function(){
           setTimeout( function(){
@@ -44,14 +46,23 @@ drinkUp = {
               secondsLeft = secondsLeft-1;
               timeout();
             }else{
-              chrome.tabs.create({ url: "http://vin65.com/" }, function(){
-                drinkerString = "";
-                drinkers.forEach(function(element, index, array){
-                  drinkerString += "\n - "+ element.user;
-                });
-                alert("You are making "+ drinkers.length +" "+drinkers[0].drinkName+"'s with "+drinkers[drinkers.length-1].user+" for "+drinkerString+"")
+              drinkerString = "";
+              drinkers.forEach(function(element, index, array){
+                drinkerString += "\n - "+ element.user;
+              });
+
+              chrome.storage.sync.get("cellNumber", function(storage){
+                console.log(storage);
+                data.cellNumber = storage.cellNumber;
+                data.textMessage = "You and "+drinkers[drinkers.length-1].user+" are making "+drinkers[drinkers.length-1].drinkName+"! For "+drinkerString+"";
+                socket.emit('textMessage', data);
+
+                var notification = webkitNotifications.createNotification("", "You and "+drinkers[drinkers.length-1].user+" are making "+drinkers[drinkers.length-1].drinkName+"!", "For "+drinkerString+"");
+                notification.show();
                 drinkers = [];
               });
+
+
             }
           },1000);
         }
@@ -61,7 +72,7 @@ drinkUp = {
   },
   socketConnection: function(){
     //Initial Socket Connection
-    socket = io.connect('138.91.225.194:3000');
+    socket = io.connect('138.91.225.194:3001');
   },
   offerDrink: function(drink){
     //User Offers a drink, message goes to server.
@@ -75,16 +86,98 @@ drinkUp = {
     //Someone else has offered a drink!
     socket.on('newOffer', function (data) {
       data.action = "newOffer";
+      chrome.storage.sync.get("name", function(storage){
+        currentUser = storage.name;
+      });
 
       chrome.storage.sync.get("desire", function(storage){
         if(storage.desire == "Want to"){
-          var notification = webkitNotifications.createNotification("","New Drink Offer!","Someone is offering " + data.drinkName);
-          notification.show();
-          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, data);
-          });
+
+          if(currentUser == data.user){
+
+            var notification = webkitNotifications.createNotification("","Offer Sent!" ,"You sent an offer for" + data.drinkName);
+            notification.show();
+
+            setTimeout(function(){
+              notification.cancel();
+            },2000)
+
+            chrome.extension.sendMessage({
+              "action":"serverCountdown"
+            });         
+
+            chrome.extension.sendMessage({
+              "action":"iWantDrink",
+              drinkID: data.drinkID,
+              drinkName: data.drinkName,
+              user: data.user,
+              currentUser:currentUser
+            });
+
+          }else{
+
+            var notification = webkitNotifications.createNotification("","New Drink Offer!",data.user+" is offering " + data.drinkName +"\n \n[Click to Accept]");
+            notification.show();
+
+
+            notification.onclick = function() {
+              // // Handle action from notification being clicked.
+              // var w = 400;
+              // var left = (screen.width/2)-(w/2);
+              // var top = (screen.height/2)-(500/2);
+              // setTimeout(function(){
+              //   chrome.extension.sendMessage({
+              //     "action":"newOffer",
+              //     drinkID: data.drinkID,
+              //     drinkName: data.drinkName,
+              //     user: data.user,
+              //     currentUser:currentUser
+              //   });
+              // },1);
+              chrome.storage.sync.get("name", function(storage){
+                chrome.extension.sendMessage({
+                  "action":"iWantDrink",
+                  drinkID: data.drinkID,
+                  drinkName: data.drinkName,
+                  user: storage.name
+                });
+              });
+              // return window.open("/views/notice.html", "", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height=300 top='+top+', left='+left);
+            }
+
+            setTimeout(function(){
+              notification.cancel();
+            },60000)
+
+          }
+
         }
       });
+    });
+  },
+  changeName: function(){
+    chrome.extension.onMessage.addListener( function(data){
+      if(data.action == "changeName"){
+        if(data.name != "none"){
+          chrome.storage.sync.set({"name":data.name});
+        }else{
+          alert("Gotta have a name!");
+        }
+      }
+    });
+  },
+  changeCellNumber: function(){
+    chrome.extension.onMessage.addListener( function(data){
+      if(data.action == "changeCellNumber"){
+        chrome.storage.sync.set({"cellNumber":data.cellNumber});
+      }
+    });
+  },
+  changeDesire: function(){
+    chrome.extension.onMessage.addListener( function(data){
+      if(data.action == "changeDesire"){
+        chrome.storage.sync.set({"desire":data.desire});
+      }
     });
   }
 }

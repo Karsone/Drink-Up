@@ -4,7 +4,7 @@
   "background": {
       "scripts": ["/js/background.js","/js/socket.io.js"]
   },
-  "version": "1.0",
+  "version": "1.0.2",
   "permissions": [
     "tabs", "http://*/*", "https://*/*", "storage", "notifications"
   ],
@@ -13,15 +13,15 @@
       "default_icon": "/images/icon.png",
       "default_popup": "/views/popup.html"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["/js/handlebars-v1.3.0.js","/js/notice.js"],
-      "css": ["/css/screen.css"],
-      "run_at": "document_start",
-      "all_frames": false
-    }
-  ],
+  // "content_scripts": [
+  //   {
+  //     "matches": ["<all_urls>"],
+  //     "js": ["/js/handlebars-v1.3.0.js","/js/notice.js"],
+  //     "css": ["/css/screen.css"],
+  //     "run_at": "document_start",
+  //     "all_frames": false
+  //   }
+  // ],
   "web_accessible_resources": [
     "/views/notice.html",
     "/js/handlebars-v1.3.0.js"

@@ -98,17 +98,19 @@ body.drinkUp{
 
 /*Notice*/
 
-.drinkUp-notice{
-	position: fixed;
-	z-index: 99999999;
-	width:400px;
-	margin-left:-200px;
-	left:50%;
+
+.drinkUp-render{
+	margin:0;
 	background: #e3e3e3;
-	top:20px;
-	-webkit-box-shadow: 0px 2px 5px 0px rgba(50, 50, 50, 0.43);
+}
+
+.drinkUp-notice{
+	width:100%;
+	background: #e3e3e3;
 	padding:10px;
 	text-align: center;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 
 .drinkUp-title{
