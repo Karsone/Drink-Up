@@ -39,7 +39,7 @@ drinkUp = {
     chrome.extension.onMessage.addListener( function(data){
       if(data.action == "serverCountdown"){
         drinkers = [];
-        secondsLeft = 10;
+        secondsLeft = 61;
         var timeout = function(){
           setTimeout( function(){
             if(secondsLeft > 1){
@@ -122,18 +122,6 @@ drinkUp = {
 
             notification.onclick = function() {
               // // Handle action from notification being clicked.
-              // var w = 400;
-              // var left = (screen.width/2)-(w/2);
-              // var top = (screen.height/2)-(500/2);
-              // setTimeout(function(){
-              //   chrome.extension.sendMessage({
-              //     "action":"newOffer",
-              //     drinkID: data.drinkID,
-              //     drinkName: data.drinkName,
-              //     user: data.user,
-              //     currentUser:currentUser
-              //   });
-              // },1);
               chrome.storage.sync.get("name", function(storage){
                 chrome.extension.sendMessage({
                   "action":"iWantDrink",
@@ -142,7 +130,6 @@ drinkUp = {
                   user: storage.name
                 });
               });
-              // return window.open("/views/notice.html", "", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height=300 top='+top+', left='+left);
             }
 
             setTimeout(function(){

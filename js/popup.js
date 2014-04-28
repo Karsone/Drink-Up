@@ -30,6 +30,9 @@ drinkUp = {
 
 			//After Render
 			document.querySelector('[name="name"]').focus();
+
+			document.querySelector('[name="name"]').value = drinkUp.templateData.options.name;
+			document.querySelector('[name="cellNumber"]').value = drinkUp.templateData.options.cellNumber;
 			drinkUp.saveName();
 		});
 	},
@@ -46,7 +49,7 @@ drinkUp = {
 					name:name
 				});
 
-				
+
 				chrome.extension.sendMessage({
 					"action":"changeCellNumber",
 					cellNumber:cellNumber
