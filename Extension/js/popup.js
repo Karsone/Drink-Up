@@ -32,7 +32,9 @@ drinkUp = {
 			document.querySelector('[name="name"]').focus();
 
 			document.querySelector('[name="name"]').value = drinkUp.templateData.options.name;
-			document.querySelector('[name="cellNumber"]').value = drinkUp.templateData.options.cellNumber;
+			if(drinkUp.templateData.options.cellNumber){
+				document.querySelector('[name="cellNumber"]').value = drinkUp.templateData.options.cellNumber;
+			}
 			drinkUp.saveName();
 		});
 	},

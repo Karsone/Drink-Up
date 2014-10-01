@@ -57,8 +57,23 @@ drinkUp = {
                 data.textMessage = "You and "+drinkers[drinkers.length-1].user+" are making "+drinkers[drinkers.length-1].drinkName+"! For "+drinkerString+"";
                 socket.emit('textMessage', data);
 
-                var notification = webkitNotifications.createNotification("", "You and "+drinkers[drinkers.length-1].user+" are making "+drinkers[drinkers.length-1].drinkName+"!", "For "+drinkerString+"");
-                notification.show();
+                var options = {
+                  type: "basic",
+                  title: "You and "+drinkers[drinkers.length-1].user+" are making "+drinkers[drinkers.length-1].drinkName+"!",
+                  message: "For "+drinkerString+"",
+                  iconUrl: "images/icon.png"
+                }
+
+                chrome.notifications.create("makingDrink", options, function(){
+
+                  setTimeout(function(){
+                    chrome.notifications.clear("makingDrink", function(){});
+                  },60000)
+
+                });
+
+
+
                 drinkers = [];
               });
 
@@ -72,7 +87,7 @@ drinkUp = {
   },
   socketConnection: function(){
     //Initial Socket Connection
-    socket = io.connect('http://knode.cloudapp.net:3001/');
+    socket = io.connect('http://knode.cloudapp.net:3001');
   },
   offerDrink: function(drink){
     //User Offers a drink, message goes to server.
@@ -95,12 +110,22 @@ drinkUp = {
 
           if(currentUser == data.user){
 
-            var notification = webkitNotifications.createNotification("","Offer Sent!" ,"You sent an offer for" + data.drinkName);
-            notification.show();
 
-            setTimeout(function(){
-              notification.cancel();
-            },2000)
+            var options = {
+              type: "basic",
+              title: "Offer Sent!",
+              message: "You sent an offer for" + data.drinkName,
+              iconUrl: "images/icon.png"
+            }
+
+            chrome.notifications.create("offerSent", options, function(){
+
+              setTimeout(function(){
+                chrome.notifications.clear("offerSent", function(){});
+              },2000)
+
+            });
+
 
             chrome.extension.sendMessage({
               "action":"serverCountdown"
@@ -116,25 +141,33 @@ drinkUp = {
 
           }else{
 
-            var notification = webkitNotifications.createNotification("","New Drink Offer!",data.user+" is offering " + data.drinkName +"\n \n[Click to Accept]");
-            notification.show();
-
-
-            notification.onclick = function() {
-              // // Handle action from notification being clicked.
-              chrome.storage.sync.get("name", function(storage){
-                chrome.extension.sendMessage({
-                  "action":"iWantDrink",
-                  drinkID: data.drinkID,
-                  drinkName: data.drinkName,
-                  user: storage.name
-                });
-              });
+            var options = {
+              type: "basic",
+              title: "New Drink Offer!",
+              message: data.user+" is offering " + data.drinkName +"\n \n[Click to Accept]",
+              iconUrl: "images/icon.png"
             }
 
-            setTimeout(function(){
-              notification.cancel();
-            },60000)
+            chrome.notifications.create("newOffer", options, function(){
+
+              chrome.notifications.onClicked.addListener(function(notificationID){
+                if(notificationID == "newOffer"){
+                  chrome.storage.sync.get("name", function(storage){
+                    chrome.extension.sendMessage({
+                      "action":"iWantDrink",
+                      drinkID: data.drinkID,
+                      drinkName: data.drinkName,
+                      user: storage.name
+                    });
+                  });
+                }
+              });
+
+              setTimeout(function(){
+                chrome.notifications.clear("newOffer", function(){});
+              },60000)
+
+            });
 
           }
 
