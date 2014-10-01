@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+<body>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://138.91.225.194:3000/');
+  console.log("loaded");
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+</script>
+
+Loaded
+
+</body>
+</html>
