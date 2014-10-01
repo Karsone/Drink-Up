@@ -33,8 +33,8 @@ io.sockets.on('connection', function (socket) {
   socket.on('textMessage', function (data) {
     // io.sockets.emit('newDrinker', data);
     // Your accountSid and authToken from twilio.com/user/account
-    var accountSid = 'AC5060a2b2afd610be8c9c608e567ff061';
-    var authToken = "48e016c34a034a14e23aa83246df76f0";
+    var accountSid = '';
+    var authToken = "";
     var client = require('twilio')(accountSid, authToken);
 
     if(data.cellNumber){
